@@ -2,6 +2,7 @@ import type { ItemPF2e } from "@item";
 import { RuleElementData, RuleElementOptions, RuleElementPF2e, RuleElementSource } from "./rule-element";
 import { ActorTraitsRuleElement } from "./rule-element/actor-traits";
 import { AdjustDegreeOfSuccessRuleElement } from "./rule-element/adjust-degree-of-success";
+import { AdjustDescriptionRuleElement } from "./rule-element/adjust-description";
 import { AdjustModifierRuleElement } from "./rule-element/adjust-modifier";
 import { AdjustStrikeRuleElement } from "./rule-element/adjust-strike";
 import { AELikeRuleElement } from "./rule-element/ae-like";
@@ -48,6 +49,7 @@ class RuleElements {
         ActiveEffectLike: AELikeRuleElement,
         ActorTraits: ActorTraitsRuleElement,
         AdjustDegreeOfSuccess: AdjustDegreeOfSuccessRuleElement,
+        AdjustDescription: AdjustDescriptionRuleElement,
         AdjustModifier: AdjustModifierRuleElement,
         AdjustStrike: AdjustStrikeRuleElement,
         Aura: AuraRuleElement,
