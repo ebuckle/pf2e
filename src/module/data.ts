@@ -42,6 +42,7 @@ type OneToFive = OneToThree | Extract<ZeroToFive, 4 | 5>;
 type ZeroToTen = ZeroToFive | 6 | 7 | 8 | 9 | 10;
 type OneToTen = Exclude<ZeroToTen, 0>;
 type ZeroToEleven = ZeroToTen | 11;
+type OneToTwenty = OneToTen | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20;
 // Sorry
 
 interface ValueAndMaybeMax {
@@ -150,4 +151,5 @@ export {
     ZeroToThree,
     ZeroToTwo,
     goesToEleven,
+    OneToTwenty,
 };

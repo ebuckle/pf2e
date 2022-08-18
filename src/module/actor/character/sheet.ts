@@ -22,6 +22,7 @@ import { PCSheetTabManager } from "./tab-manager";
 import { AbilityBuilderPopup } from "../sheet/popups/ability-builder";
 import { CharacterConfig } from "./config";
 import { DropCanvasItemDataPF2e } from "@module/canvas/drop-canvas-data";
+import { SkillBuilderPopup } from "@actor/sheet/popups/skill-builder";
 
 class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
     protected readonly actorConfigClass = CharacterConfig;
@@ -548,6 +549,10 @@ class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
 
         $html.find("button[data-action=edit-ability-scores]").on("click", async () => {
             await new AbilityBuilderPopup(this.actor).render(true);
+        });
+
+        $html.find("button[data-action=edit-skills]").on("click", async () => {
+            await new SkillBuilderPopup(this.actor).render(true);
         });
 
         // SPELLCASTING

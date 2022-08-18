@@ -1,0 +1,128 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+    <div>
+        <div class="row header-row{{#if manual}} not-eligible{{/if}}">
+            <div class="row-heading">
+                <h3>{{localize "PF2E.Actor.Character.SkillBuilder.Title"}}</h3>
+            </div>
+            {{#each skills as |skill key|}}
+                <div class="row-column">
+                    <h3>{{localize skill}}</h3>
+                </div>
+            {{/each}}
+        </div>
+
+        {{#each levelSkillData as |skillData|}}
+            {{#if skillData.eligible}}
+                <div class="row{{#if manual}} not-eligible{{/if}}">
+                    <div class="row-heading">
+                        <div class="label">
+                            <div class="title">{{localize "PF2E.LevelN" level=skillData.level}}</div>
+                        </div>
+                    </div>
+                </div>
+                {{#if skillData.increase.eligible}}
+                {{#with skillData.increase}}
+                    <div class="row{{#if ../manual}} not-eligible{{/if}}">
+                        <div class="row-heading">
+                            {{#unless (eq remaining 0)}}<div class="remaining extra">{{remaining}}</div>{{/unless}}
+                            <div class="label">
+                                <div class="description">
+                                    {{localize "PF2E.SkillIncrease"}}
+                                </div>
+                            </div>
+                        </div>
+                        {{#each skills as |skill|}}
+                            <div class="row-column">
+                                <button type="button" data-action="level" data-level="{{skillData.level}}" data-skill="{{skill.skill}}"
+                                    class="boost {{#if skill.taken}} selected{{/if}}{{#if (not eligible)}} hidden{{/if}}"
+                                    {{disabled (and full (not taken))}}
+                                >
+                                    {{localize "PF2E.Actor.Character.AbilityBuilder.Boost"}}
+                                </button>
+                            </div>
+                        {{/each}}
+                    </div>
+                {{/with}}
+                {{/if}}
+                {{#if skillData.training.eligible}}
+                {{#with skillData.training}}
+                    <div class="row{{#if ../manual}} not-eligible{{/if}}">
+                        <div class="row-heading">
+                            {{#unless (eq remaining 0)}}<div class="remaining extra">{{remaining}}</div>{{/unless}}
+                            <div class="label">
+                                <div class="description">
+                                    {{localize "PF2E.SkillTraining"}}
+                                </div>
+                            </div>
+                        </div>
+                        {{#each skills as |skill|}}
+                            <div class="row-column">
+                                <button type="button" data-action="level" data-level="{{skillData.level}}" data-skill="{{skill.skill}}"
+                                    class="boost {{#if skill.taken}} selected{{/if}}{{#if (not eligible)}} hidden{{/if}}"
+                                    {{disabled (and full (not taken))}}
+                                >
+                                    {{localize "PF2E.Actor.Character.AbilityBuilder.Boost"}}
+                                </button>
+                            </div>
+                        {{/each}}
+                    </div>
+                {{/with}}
+                {{/if}}
+                <hr>
+            {{/if}}
+        {{/each}}
+
+        <div class="row summary-row">
+            <div class="row-heading">
+                <div class="hint-container">
+                    <h3>{{localize "PF2E.Actor.Character.AbilityBuilder.AbilityScoreMethod.Title"}}</h3>
+                    <p>{{localize "PF2E.Actor.Character.AbilityBuilder.AbilityScoreMethod.Description"}}</p>
+                    <label>
+                        <input type="checkbox" name="toggle-manual-mode"{{checked manual}}>
+                        {{localize "PF2E.Actor.Character.AbilityBuilder.AbilityScoreMethod.UseCustomLabel"}}
+                    </label>
+                </div>
+            </div>
+            {{#each abilityScores as |ability key|}}
+                <div class="row-column">
+                    {{#if ../manual}}
+                        <button type="button" data-action="class-key-ability" data-key="{{lookup ../abilities key}}" data-ability="{{key}}"
+                            class="boost{{#if (eq ../manualKeyAbility key)}} selected{{/if}}"
+                            tabindex="-1"
+                        >
+                            <i class="fas fa-key"></i>
+                            {{localize "PF2E.Actor.Character.AbilityBuilder.KeyIcon"}}
+                        </button>
+                        <input type="number" data-property="data.abilities.{{key}}.value" name="data.abilities.{{key}}.value" value="{{ability.base}}" placeholder="10">
+                    {{else}}
+                        <button type="button" class="boost hidden"></button>
+                        <div class="value">{{ability.base}}</div>
+                    {{/if}}
+                    <h4>{{localize (lookup ../abilities key)}}</h4>
+                </div>
+            {{/each}}
+            <div class="complete">
+                <button type="button" data-action="close">{{localize "PF2E.Actor.Character.AbilityBuilder.Complete"}}</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row background-stripes">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</form>

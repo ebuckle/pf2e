@@ -81,6 +81,7 @@ import {
 import { fromUUIDs } from "@util/from-uuids";
 import { CraftingEntry, CraftingEntryData, CraftingFormula } from "./crafting";
 import {
+    AllowedSkills,
     AuxiliaryAction,
     BaseWeaponProficiencyKey,
     CharacterArmorClass,
@@ -96,6 +97,7 @@ import {
     MagicTraditionProficiencies,
     MartialProficiencies,
     MartialProficiency,
+    SkillTraining,
     WeaponGroupProficiencyKey,
 } from "./data";
 import { CharacterSheetTabVisibility } from "./data/sheet";
@@ -287,6 +289,19 @@ class CharacterPF2e extends CreaturePF2e {
             return result;
         }, {} as Record<typeof boostLevels[number], number>);
         const existingBoosts = systemData.build?.abilities?.boosts;
+
+        const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const;
+        const skillTrainingData = systemData.build?.skills?.skillTraining ?? [];
+        const skillTraining = levels.reduce((result, level) => {
+            result[level] = (skillTrainingData?.[level] ?? []) as [SkillAbbreviation];
+            return result;
+        }, {} as SkillTraining);
+        const skillIncreasesData = systemData.build?.skills?.skillTraining ?? [];
+        const skillIncreases = levels.reduce((result, level) => {
+            result[level] = (skillIncreasesData?.[level] ?? []) as [SkillAbbreviation];
+            return result;
+        }, {} as SkillTraining);
+
         systemData.build = {
             abilities: {
                 manual: Object.keys(systemData.abilities).length > 0,
@@ -305,6 +320,14 @@ class CharacterPF2e extends CreaturePF2e {
                 flaws: {
                     ancestry: [],
                 },
+            },
+            skills: {
+                // Since skill training relies on knowing Intelligence scores, manual ability boosts will cause manual skill training
+                manual: Object.keys(systemData.abilities).length > 0,
+                skillTraining: skillTraining,
+                skillIncreases: skillIncreases,
+                allowedIncreases: {},
+                allowedTraining: {},
             },
         };
 
@@ -445,6 +468,7 @@ class CharacterPF2e extends CreaturePF2e {
     override prepareDataFromItems(): void {
         super.prepareDataFromItems();
         this.setAbilityScores();
+        this.setSkillIncreasesAndTraining();
     }
 
     override prepareDerivedData(): void {
@@ -862,6 +886,59 @@ class CharacterPF2e extends CreaturePF2e {
             // Record base values: same as stored value if in manual mode, and prior to RE modifications otherwise
             ability.base = ability.value;
         }
+    }
+
+    private setSkillIncreasesAndTraining(): void {
+        const { build } = this.system;
+        const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const;
+        const allowedSkillIncreases = this.class?.data.system.skillIncreaseLevels.value ?? [];
+        build.skills.allowedIncreases = levels.reduce((result, level) => {
+            const allowed = (() => {
+                if (this.level < 1) return 0;
+                return this.level >= level && allowedSkillIncreases.includes(level) ? 1 : 0;
+            })();
+
+            result[level] = allowed;
+            return result;
+        }, {} as AllowedSkills);
+
+        // Level 1 skill training and additional skills from INT boosts
+        // Calculate int boosts per level
+        const intBoostsByLevel = { 1: 0, 5: 0, 10: 0, 15: 0, 20: 0 };
+        for (const section of ["ancestry", "background", "class", 1, 5, 10, 15, 20] as const) {
+            const boosts = build.abilities.boosts[section];
+            if (typeof boosts === "string" && boosts === "int") {
+                // Class's key ability score
+                intBoostsByLevel[1] += 1;
+            } else if (Array.isArray(boosts)) {
+                const level = typeof section === "string" ? 1 : section;
+                for (const abbrev of boosts) {
+                    if (abbrev === "int") intBoostsByLevel[level] += 1;
+                }
+            }
+
+            const flaws = section === "ancestry" ? build.abilities.flaws[section] : [];
+            for (const abbrev of flaws) {
+                if (abbrev === "int") intBoostsByLevel[1] -= 1;
+            }
+        }
+        let totalBoosts = intBoostsByLevel[1];
+        build.skills.allowedTraining = levels.reduce((result, level) => {
+            const allowed = (() => {
+                if (this.level < 1 || this.level < level) return 0;
+                if (level === 1) return (this.class?.system.trainedSkills.additional || 0) + intBoostsByLevel[1];
+                if (level === 5 || level === 10 || level === 15 || level === 20) {
+                    if (intBoostsByLevel[level] === 0) return 0;
+                    totalBoosts += 1;
+                    if (totalBoosts >= 5 && totalBoosts % 2 === 1) return 0;
+                    return 1;
+                }
+                return 0;
+            })();
+
+            result[level] = allowed;
+            return result;
+        }, {} as AllowedSkills);
     }
 
     /** Set roll operations for ability scores, proficiency ranks, and number of hands free */

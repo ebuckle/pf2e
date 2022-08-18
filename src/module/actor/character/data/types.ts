@@ -34,7 +34,7 @@ import { DeitySystemData } from "@item/deity/data";
 import { DeityDomain } from "@item/deity/types";
 import { MagicTradition } from "@item/spell/types";
 import { BaseWeaponType, WeaponCategory, WeaponGroup } from "@item/weapon/types";
-import { ZeroToFour } from "@module/data";
+import { OneToTwenty, ZeroToFour } from "@module/data";
 import { DegreeOfSuccessAdjustment } from "@system/degree-of-success";
 import { PredicatePF2e } from "@system/predication";
 import type { CharacterPF2e } from "..";
@@ -110,6 +110,20 @@ interface CharacterSystemData extends CreatureSystemData {
             flaws: {
                 ancestry: AbilityString[];
             };
+        };
+        skills: {
+            /**
+               Whether this PC's ability scores are being manually entered
+            */
+            manual: boolean;
+
+            skillTraining: SkillTraining;
+
+            skillIncreases: SkillTraining;
+
+            allowedIncreases: AllowedSkills;
+
+            allowedTraining: AllowedSkills;
         };
     };
 
@@ -438,7 +452,16 @@ interface BonusFeat {
     grants: GrantedFeat[];
 }
 
+type SkillTraining = {
+    [Level in OneToTwenty]: [SkillAbbreviation];
+};
+
+type AllowedSkills = {
+    [Level in OneToTwenty]: number;
+};
+
 export {
+    AllowedSkills,
     AuxiliaryAction,
     BaseWeaponProficiencyKey,
     BonusFeat,
@@ -462,6 +485,7 @@ export {
     MartialProficiencies,
     MartialProficiency,
     MartialProficiencyKey,
+    SkillTraining,
     SlottedFeat,
     WeaponGroupProficiencyKey,
 };
