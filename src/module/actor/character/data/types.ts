@@ -34,7 +34,7 @@ import { DeitySystemData } from "@item/deity/data";
 import { DeityDomain } from "@item/deity/types";
 import { MagicTradition } from "@item/spell/types";
 import { BaseWeaponType, WeaponCategory, WeaponGroup } from "@item/weapon/types";
-import { OneToTwenty, ZeroToFour } from "@module/data";
+import { OneToFour, ZeroToFour, ZeroToTwenty } from "@module/data";
 import { DegreeOfSuccessAdjustment } from "@system/degree-of-success";
 import { PredicatePF2e } from "@system/predication";
 import type { CharacterPF2e } from "..";
@@ -117,13 +117,14 @@ interface CharacterSystemData extends CreatureSystemData {
             */
             manual: boolean;
 
-            skillTraining: SkillTraining;
+            allowedIncreases: Record<ZeroToTwenty, number>;
 
-            skillIncreases: SkillTraining;
+            allowedTraining: Record<ZeroToTwenty, number>;
 
-            allowedIncreases: AllowedSkills;
+            skillData: Record<SkillAbbreviation, SkillProficiencyProgression>;
 
-            allowedTraining: AllowedSkills;
+            // TODO: fully support lore skills
+            loreData: Record<string, SkillProficiencyProgression>;
         };
     };
 
@@ -452,16 +453,22 @@ interface BonusFeat {
     grants: GrantedFeat[];
 }
 
-type SkillTraining = {
-    [Level in OneToTwenty]: [SkillAbbreviation];
-};
-
-type AllowedSkills = {
-    [Level in OneToTwenty]: number;
+type SkillProficiencyProgression = {
+    [Prof in OneToFour]?: {
+        level: number;
+        source: {
+            type: string;
+            name: string;
+            img: string;
+        };
+        validity: {
+            valid: boolean;
+            reason: string;
+        };
+    };
 };
 
 export {
-    AllowedSkills,
     AuxiliaryAction,
     BaseWeaponProficiencyKey,
     BonusFeat,
@@ -485,7 +492,7 @@ export {
     MartialProficiencies,
     MartialProficiency,
     MartialProficiencyKey,
-    SkillTraining,
+    SkillProficiencyProgression,
     SlottedFeat,
     WeaponGroupProficiencyKey,
 };
