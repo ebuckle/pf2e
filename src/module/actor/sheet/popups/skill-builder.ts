@@ -1,8 +1,8 @@
 import { CharacterPF2e } from "@actor";
-import { SkillAbbreviation } from "@actor/types";
+import { OneToFour } from "@module/data";
 
 export class SkillBuilderPopup extends Application {
-    constructor(private actor: CharacterPF2e) {
+    constructor(private actor: CharacterPF2e, private skill: string) {
         super();
         actor.apps[this.appId] = this;
     }
@@ -18,7 +18,7 @@ export class SkillBuilderPopup extends Application {
     }
 
     override get id(): string {
-        return `skill-builder-${this.actor.id}`;
+        return `skill-builder-${this.actor.id}-${this.skill}`;
     }
 
     override activateListeners($html: JQuery): void {
@@ -52,15 +52,15 @@ export class SkillBuilderPopup extends Application {
     }
 
     override async getData(options: Partial<FormApplicationOptions> = {}): Promise<PopupData> {
-        const { actor } = this;
+        const { actor, skill } = this;
         const build = actor.system.build.abilities;
 
         return {
             ...(await super.getData(options)),
             actor,
-            skills: CONFIG.PF2E.skills,
             manual: build.manual,
             levelSkillData: {},
+            skill,
         };
     }
 
@@ -73,23 +73,24 @@ export class SkillBuilderPopup extends Application {
 
 interface PopupData {
     actor: CharacterPF2e;
-    skills: Record<SkillAbbreviation, string>;
     manual: boolean;
     levelSkillData: Record<number, SkillData>;
+    skill: string;
 }
 
-interface SkillData {
-    increase: {
-        skills: { skill: string; taken: boolean }[];
-        full: boolean;
+type SkillData = {
+    [Prof in OneToFour]: {
+        level: number;
+        source: {
+            type: string;
+            name: string;
+            img: string;
+        };
+        validity: {
+            valid: boolean;
+            reason: string;
+        };
         eligible: boolean;
-        remaining: number;
+        taken: boolean;
     };
-    training: {
-        skills: { skill: string; taken: boolean }[];
-        full: boolean;
-        eligible: boolean;
-        remaining: number;
-    };
-    eligible: boolean;
-}
+};

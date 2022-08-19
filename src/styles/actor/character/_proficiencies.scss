@@ -65,7 +65,7 @@
                     / 42px 2fr 1fr;
                 align-items: center;
 
-                .rollable {
+                .rollable, .edit {
                     cursor: pointer;
                     &:hover {
                         color: var(--primary);

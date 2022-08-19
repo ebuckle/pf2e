@@ -5,13 +5,13 @@
 //
 exports[`too-much-lint`] = {
   value: `{
-    "src/module/actor/character/sheet.ts:2985085007": [
-      [118, 72, 3, "Unexpected any. Specify a different type.", "193409811"],
-      [118, 77, 3, "Unexpected any. Specify a different type.", "193409811"],
-      [126, 72, 3, "Unexpected any. Specify a different type.", "193409811"],
-      [126, 77, 3, "Unexpected any. Specify a different type.", "193409811"],
-      [213, 64, 3, "Unexpected any. Specify a different type.", "193409811"],
-      [293, 30, 3, "Unexpected any. Specify a different type.", "193409811"]
+    "src/module/actor/character/sheet.ts:2611734816": [
+      [120, 72, 3, "Unexpected any. Specify a different type.", "193409811"],
+      [120, 77, 3, "Unexpected any. Specify a different type.", "193409811"],
+      [128, 72, 3, "Unexpected any. Specify a different type.", "193409811"],
+      [128, 77, 3, "Unexpected any. Specify a different type.", "193409811"],
+      [215, 64, 3, "Unexpected any. Specify a different type.", "193409811"],
+      [295, 30, 3, "Unexpected any. Specify a different type.", "193409811"]
     ],
     "src/module/actor/modifiers.ts:2050442843": [
       [441, 19, 3, "Unexpected any. Specify a different type.", "193409811"]

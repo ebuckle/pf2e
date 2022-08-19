@@ -1387,6 +1387,7 @@
             "CantImportTooHighVersion": "Unable to import {sourceName}: its schema version ({sourceSchemaVersion}) is higher than this world's ({worldSchemaVersion}).",
             "CantMoveItemDestination": "You are not allowed to move items to this character.",
             "CantMoveItemSource": "You are not allowed to move items from this character.",
+            "MinimumProfLevelSetByBuild": "Cannot change skill proficiencies while skill building is not manual.",
             "MinimumProfLevelSetByFeatures": "The selected proficiency is below proficiency set by features.",
             "NoTokenSelected": "Select at least one token.",
             "NoPCTokenSelected": "Select at least one token associated with a PC.",

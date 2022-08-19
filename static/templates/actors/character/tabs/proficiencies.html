@@ -7,7 +7,7 @@
                 {{#unless skill.lore}}
                     <li class="skill" data-skill="{{key}}">
                         <h1 class="skill-score rollable" title="{{skill.breakdown}}">{{numberFormat skill.value decimals=0 sign=true}}</h1>
-                        <h4 class="skill-name rollable">{{localize skill.label}}</h4>
+                        <h4 class="skill-name edit">{{localize skill.label}}</h4>
                         <div class="skill-prof button-group">
                             <select class="skill-proficiency pf-rank adjust-stat-select" data-property="system.skills.{{key}}.rank" value="{{skill.rank}}">
                                 {{> systems/pf2e/templates/actors/character/partials/proficiencylevels-dropdown.html proflevel=skill.rank }}

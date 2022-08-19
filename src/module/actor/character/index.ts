@@ -96,6 +96,7 @@ import {
     MagicTraditionProficiencies,
     MartialProficiencies,
     MartialProficiency,
+    SkillProficiencyProgression,
     WeaponGroupProficiencyKey,
 } from "./data";
 import { CharacterSheetTabVisibility } from "./data/sheet";
@@ -288,6 +289,12 @@ class CharacterPF2e extends CreaturePF2e {
         }, {} as Record<typeof boostLevels[number], number>);
         const existingBoosts = systemData.build?.abilities?.boosts;
 
+        // Skill Training Data
+        const skillData = Array.from(SKILL_ABBREVIATIONS.values()).reduce((skillData, abrv) => {
+            skillData[abrv] = systemData.build?.skills?.skillData?.[abrv] || {};
+            return skillData;
+        }, {} as Record<SkillAbbreviation, SkillProficiencyProgression>);
+
         systemData.build = {
             abilities: {
                 manual: Object.keys(systemData.abilities).length > 0,
@@ -311,8 +318,8 @@ class CharacterPF2e extends CreaturePF2e {
                 // Since skill training relies on knowing Intelligence scores, manual ability boosts will cause manual skill training
                 // TODO: implement skill manual toggle that cannot be enabled if boosts are manual
                 manual: Object.keys(systemData.abilities).length > 0,
-                skillData: systemData.build?.skills?.skillData ?? {},
-                loreData: systemData.build?.skills?.loreData ?? {},
+                skillData: skillData,
+                loreData: systemData.build?.skills?.loreData || {},
                 allowedIncreases: {},
                 allowedTraining: {},
             },
@@ -878,7 +885,7 @@ class CharacterPF2e extends CreaturePF2e {
     private setSkillIncreasesAndTraining(): void {
         const { build } = this.system;
         const levels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const;
-        const allowedSkillIncreases = this.class?.data.system.skillIncreaseLevels.value ?? [];
+        const allowedSkillIncreases = this.class?.system.skillIncreaseLevels.value ?? [];
         build.skills.allowedIncreases = levels.reduce((result, level) => {
             const allowed = (() => {
                 if (this.level < 1) return 0;
@@ -1044,10 +1051,10 @@ class CharacterPF2e extends CreaturePF2e {
 
     prepareSkillProficiency(shortForm: SkillAbbreviation): ZeroToFour {
         const skillData = this.system.build.skills.skillData[shortForm];
-        if (skillData[4] && skillData[4].level <= this.system.details.level.value) return 4;
-        if (skillData[3] && skillData[3].level <= this.system.details.level.value) return 3;
-        if (skillData[2] && skillData[2].level <= this.system.details.level.value) return 2;
-        if (skillData[1] && skillData[1].level <= this.system.details.level.value) return 1;
+        if (skillData["4"] !== undefined && skillData["4"].level <= this.system.details.level.value) return 4;
+        if (skillData["3"] !== undefined && skillData["3"].level <= this.system.details.level.value) return 3;
+        if (skillData["2"] !== undefined && skillData["2"].level <= this.system.details.level.value) return 2;
+        if (skillData["1"] !== undefined && skillData["1"].level <= this.system.details.level.value) return 1;
         return 0;
     }
 
@@ -1061,10 +1068,12 @@ class CharacterPF2e extends CreaturePF2e {
             const skill = systemData.skills[shortForm];
             const longForm = SKILL_DICTIONARY[shortForm];
 
+            const skillRank = systemData.build.skills.manual ? skill.rank : this.prepareSkillProficiency(shortForm);
+
             const domains = [longForm, `${skill.ability}-based`, "skill-check", `${skill.ability}-skill-check`, "all"];
             const modifiers = [
                 createAbilityModifier({ actor: this, ability: skill.ability, domains }),
-                ProficiencyModifier.fromLevelAndRank(this.level, skill.rank),
+                ProficiencyModifier.fromLevelAndRank(this.level, skillRank),
             ];
             for (const modifier of modifiers) {
                 modifier.adjustments = extractModifierAdjustments(
@@ -1125,7 +1134,7 @@ class CharacterPF2e extends CreaturePF2e {
                 .join(", ");
             stat.value = stat.totalModifier;
             stat.notes = extractNotes(synthetics.rollNotes, domains);
-            stat.rank = systemData.build.skills.manual ? skill.rank : this.prepareSkillProficiency(shortForm);
+            stat.rank = skillRank;
             stat.roll = async (args: RollParameters): Promise<Rolled<CheckRoll> | null> => {
                 console.warn(
                     `Rolling skill checks via actor.system.skills.${shortForm}.roll() is deprecated, use actor.skills.${longForm}.check.roll() instead`

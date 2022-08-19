@@ -23,6 +23,7 @@ import { AbilityBuilderPopup } from "../sheet/popups/ability-builder";
 import { CharacterConfig } from "./config";
 import { DropCanvasItemDataPF2e } from "@module/canvas/drop-canvas-data";
 import { SkillBuilderPopup } from "@actor/sheet/popups/skill-builder";
+import { SKILL_DICTIONARY } from "@actor/values";
 
 class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
     protected readonly actorConfigClass = CharacterConfig;
@@ -551,8 +552,11 @@ class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
             await new AbilityBuilderPopup(this.actor).render(true);
         });
 
-        $html.find("button[data-action=edit-skills]").on("click", async () => {
-            await new SkillBuilderPopup(this.actor).render(true);
+        // Roll skill checks
+        $html.find(".skill-name.edit").on("click", async (event) => {
+            const skill = event.currentTarget.closest<HTMLElement>("[data-skill]")?.dataset.skill ?? "";
+            const key = objectHasKey(SKILL_DICTIONARY, skill) ? SKILL_DICTIONARY[skill] : skill;
+            await new SkillBuilderPopup(this.actor, key).render(true);
         });
 
         // SPELLCASTING
@@ -797,7 +801,11 @@ class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
 
         await this.actor.update({ [propertyKey]: newValue });
         if (newValue !== getProperty(this.actor, propertyKey)) {
-            ui.notifications.warn(game.i18n.localize("PF2E.ErrorMessage.MinimumProfLevelSetByFeatures"));
+            if (!this.actor.system.build.skills.manual) {
+                ui.notifications.warn(game.i18n.localize("PF2E.ErrorMessage.MinimumProfLevelSetByBuild"));
+            } else {
+                ui.notifications.warn(game.i18n.localize("PF2E.ErrorMessage.MinimumProfLevelSetByFeatures"));
+            }
         }
     }
 
