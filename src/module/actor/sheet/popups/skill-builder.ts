@@ -1,8 +1,9 @@
 import { CharacterPF2e } from "@actor";
-import { OneToFour } from "@module/data";
+import { SkillAbbreviation } from "@actor/types";
+import { OneToFour, ZeroToFour } from "@module/data";
 
 export class SkillBuilderPopup extends Application {
-    constructor(private actor: CharacterPF2e, private skill: string) {
+    constructor(private actor: CharacterPF2e, private skill: SkillAbbreviation) {
         super();
         actor.apps[this.appId] = this;
     }
@@ -11,9 +12,10 @@ export class SkillBuilderPopup extends Application {
         return {
             ...super.defaultOptions,
             classes: ["skill-builder-popup"],
-            title: game.i18n.localize("PF2E.SkillsLabel"),
+            title: game.i18n.localize("Skill Proficiency"),
             template: "systems/pf2e/templates/actors/character/skill-builder.html",
-            width: "auto",
+            width: "500px",
+            height: "auto",
         };
     }
 
@@ -53,14 +55,39 @@ export class SkillBuilderPopup extends Application {
 
     override async getData(options: Partial<FormApplicationOptions> = {}): Promise<PopupData> {
         const { actor, skill } = this;
-        const build = actor.system.build.abilities;
+        const build = actor.system.build.skills;
+
+        // TODO: handling eligibility
+        const skillBuildData = build.skillData[skill];
+        const skillData: SkillData = {
+            1: skillBuildData[1]
+                ? { ...skillBuildData[1], taken: true, eligible: true }
+                : { taken: false, eligible: true },
+            2: skillBuildData[2]
+                ? { ...skillBuildData[2], taken: true, eligible: true }
+                : { taken: false, eligible: true },
+            3: skillBuildData[3]
+                ? { ...skillBuildData[3], taken: true, eligible: true }
+                : { taken: false, eligible: true },
+            4: skillBuildData[4]
+                ? { ...skillBuildData[4], taken: true, eligible: true }
+                : { taken: false, eligible: true },
+        };
+
+        const skillName = game.i18n.localize("PF2E.Skill" + skill.charAt(0).toUpperCase() + skill.slice(1));
+
+        const currentRank = this.actor.skills[skill].rank;
+        const currentRankLabel = game.i18n.localize("PF2E.ProficiencyLevel" + currentRank);
 
         return {
             ...(await super.getData(options)),
             actor,
             manual: build.manual,
-            levelSkillData: {},
+            skillData: skillData,
             skill,
+            skillName: skillName,
+            currentRank: currentRank,
+            currentRankLabel: currentRankLabel,
         };
     }
 
@@ -74,19 +101,22 @@ export class SkillBuilderPopup extends Application {
 interface PopupData {
     actor: CharacterPF2e;
     manual: boolean;
-    levelSkillData: Record<number, SkillData>;
+    skillData: SkillData;
     skill: string;
+    skillName: string;
+    currentRank: ZeroToFour;
+    currentRankLabel: string;
 }
 
 type SkillData = {
     [Prof in OneToFour]: {
-        level: number;
-        source: {
+        level?: number;
+        source?: {
             type: string;
             name: string;
             img: string;
         };
-        validity: {
+        validity?: {
             valid: boolean;
             reason: string;
         };

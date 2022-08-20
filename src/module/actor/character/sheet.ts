@@ -555,8 +555,7 @@ class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
         // Roll skill checks
         $html.find(".skill-name.edit").on("click", async (event) => {
             const skill = event.currentTarget.closest<HTMLElement>("[data-skill]")?.dataset.skill ?? "";
-            const key = objectHasKey(SKILL_DICTIONARY, skill) ? SKILL_DICTIONARY[skill] : skill;
-            await new SkillBuilderPopup(this.actor, key).render(true);
+            if (objectHasKey(SKILL_DICTIONARY, skill)) await new SkillBuilderPopup(this.actor, skill).render(true);
         });
 
         // SPELLCASTING

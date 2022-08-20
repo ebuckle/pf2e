@@ -1,10 +1,176 @@
 <form autocomplete="off" onsubmit="event.preventDefault();">
-    <div class="skill-title"></div>
-    <div class="proficiency-title legendary {{#if eligible}} not-eligible{{/if}}">
-        <!-- IF/ELSE for whether or not the skill has an entry or not -->
-        <div class="proficiency-data">
-            
+    <div class="skill-title">
+        <div class="skill-name">
+            {{skillName}}   
+        </div>
+        <div class="proficiency-title rank-{{currentRank}}">
+            {{currentRankLabel}}
         </div>
     </div>
 
+    {{#with skillData.[1]}}
+    <div class="row">
+        <div class="proficiency-title rank-1 {{#if eligible}} not-eligible{{/if}}">
+            {{localize "PF2E.ProficiencyLevel1"}}
+        </div>
+        <div class="data">
+            {{#if taken}}
+                <div class="proficiency-data">
+                    <div class="source">
+                        <div class="level">
+                            {{level}}
+                        </div>
+                        <img src="{{source.img}}" title="{{source.name}}" width="38" height="38" loading="lazy"/>
+                        <div class="label">
+                            <div class="type">{{source.type}}</div>
+                            <div class="name">{{source.name}}</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <a class="delete">
+                            <i class="fas fa-fw fa-trash"></i>
+                        </a>
+                    </div> 
+                </div>
+                {{else}}
+                <div class="increase-title">
+                    Add Skill Increase
+                </div>
+                <div class="apply-increase">
+                    <div class="controls">
+                        <a class="add-increase">
+                            <i class="fas fa-fw fa-plus"></i>
+                        </a>
+                    </div> 
+                </div>
+            {{/if}}
+        </div>
+    </div>
+    {{/with}}
+
+    {{#with skillData.[2]}}
+    <div class="row">
+        <div class="proficiency-title rank-2 {{#if eligible}} not-eligible{{/if}}">
+            {{localize "PF2E.ProficiencyLevel2"}}
+        </div>
+        <div class="data">
+            {{#if taken}}
+                <div class="proficiency-data">
+                    <div class="source">
+                        <div class="level">
+                            {{level}}
+                        </div>
+                        <img src="{{source.img}}" title="{{source.name}}" width="38" height="38" loading="lazy"/>
+                        <div class="label">
+                            <div class="type">{{source.type}}</div>
+                            <div class="name">{{source.name}}</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <a class="delete">
+                            <i class="fas fa-fw fa-trash"></i>
+                        </a>
+                    </div> 
+                </div>
+                {{else}}
+                <div class="increase-title">
+                    Add Skill Increase
+                </div>
+                <div class="apply-increase">
+                    <div class="controls">
+                        <a class="add-increase">
+                            <i class="fas fa-fw fa-plus"></i>
+                        </a>
+                    </div> 
+                </div>
+            {{/if}}
+        </div>
+    </div>
+    {{/with}}
+
+    {{#with skillData.[3]}}
+    <div class="row">
+        <div class="proficiency-title rank-3 {{#if eligible}} not-eligible{{/if}}">
+            {{localize "PF2E.ProficiencyLevel3"}}
+        </div>
+        <div class="data">
+            {{#if taken}}
+                <div class="proficiency-data">
+                    <div class="source">
+                        <div class="level">
+                            {{level}}
+                        </div>
+                        <img src="{{source.img}}" title="{{source.name}}" width="38" height="38" loading="lazy"/>
+                        <div class="label">
+                            <div class="type">{{source.type}}</div>
+                            <div class="name">{{source.name}}</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <a class="delete">
+                            <i class="fas fa-fw fa-trash"></i>
+                        </a>
+                    </div> 
+                </div>
+                {{else}}
+                <div class="increase-title">
+                    Add Skill Increase
+                </div>
+                <div class="apply-increase">
+                    <div class="controls">
+                        <a class="add-increase">
+                            <i class="fas fa-fw fa-plus"></i>
+                        </a>
+                    </div> 
+                </div>
+            {{/if}}
+        </div>
+    </div>
+    {{/with}}
+
+    {{#with skillData.[4]}}
+    <div class="row">
+        <div class="proficiency-title rank-4 {{#if eligible}} not-eligible{{/if}}">
+            {{localize "PF2E.ProficiencyLevel4"}}
+        </div>
+        <div class="data">
+            {{#if taken}}
+                <div class="proficiency-data">
+                    <div class="source">
+                        <div class="level">
+                            {{level}}
+                        </div>
+                        <img src="{{source.img}}" title="{{source.name}}" width="38" height="38" loading="lazy"/>
+                        <div class="label">
+                            <div class="type">{{source.type}}</div>
+                            <div class="name">{{source.name}}</div>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <a class="delete">
+                            <i class="fas fa-fw fa-trash"></i>
+                        </a>
+                    </div> 
+                </div>
+                {{else}}
+                <div class="increase-title">
+                    Add Skill Increase
+                </div>
+                <div class="apply-increase">
+                    <div class="controls">
+                        <a class="add-increase">
+                            <i class="fas fa-fw fa-plus"></i>
+                        </a>
+                    </div> 
+                </div>
+            {{/if}}
+        </div>
+    </div>
+    {{/with}}
+    
+    <div class="controls">
+        <button class="complete">
+            Complete
+        </button>
+    </div> 
 </form>
