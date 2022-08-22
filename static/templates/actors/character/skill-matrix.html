@@ -1,0 +1,95 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+    <div>
+        <div class="row header-row{{#if manual}} not-eligible{{/if}}">
+            <div class="row-heading">
+                <h3>{{localize "Skill Builder"}}</h3>
+            </div>
+            {{#each skillAbr as |abr key|}}
+                <div class="row-column">
+                    <h3>{{abr}}</h3>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+
+    {{#each trainingData as |data level|}}
+    {{#if data.eligible}}
+    <div class="row{{#if manual}} not-eligible{{/if}}">
+        <div class="row-heading">
+            <div class="label">
+                <div class="title">{{localize (add "PF2E.Level" level)}}</div>
+            </div>
+        </div>
+    </div>
+
+        {{#if (gt data.allowedTraining 0)}}
+        <div class="row">
+            
+            <div class="row-heading">
+                {{#unless (eq data.remainingTraining 0)}}<div class="remaining extra">{{data.remainingTraining}}</div>{{/unless}}
+                <div class="label">
+                    <div class="description">
+                        Skill Training
+                    </div>
+                </div>
+            </div>
+            {{#each data.skills as |skill|}}
+                <div class="row-column">
+                    <button type="button" data-action="level" data-level="{{boosts.level}}" data-ability="{{ability}}"
+                        class="boost {{#if skill.trained}} selected{{/if}}{{#if (not skill.canBeTrained)}} hidden{{/if}} rank-{{skill.rank}}"
+                        {{disabled (and (eq data.remainingTraining 0) (not skill.trained))}}
+                    >
+                        {{localize skill.rankLabel}}
+                    </button>
+                </div>
+            {{/each}}
+        </div>
+        {{/if}}
+
+        {{#if (gt data.allowedIncreases 0)}}
+        <div class="row">
+            
+            <div class="row-heading">
+                {{#unless (eq data.remainingIncreases 0)}}<div class="remaining extra">{{data.remainingIncreases}}</div>{{/unless}}
+                <div class="label">
+                    <div class="description">
+                        Skill Increase
+                    </div>
+                </div>
+            </div>
+            {{#each data.skills as |skill|}}
+                <div class="row-column">
+                    <button type="button" data-action="level" data-level="{{boosts.level}}" data-ability="{{ability}}"
+                        class="boost {{#if skill.increased}} selected{{/if}}{{#if (not skill.canBeIncreased)}} hidden{{/if}} rank-{{skill.rank}}"
+                        {{disabled (and (eq data.remainingIncreases 0) (not skill.increased))}}
+                    >
+                        {{localize skill.rankLabel}}
+                    </button>
+                </div>
+            {{/each}}
+        </div>
+        {{/if}}
+    <hr />
+    {{/if}}
+    {{/each}}
+
+    <div class="row background-stripes">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+</form>
