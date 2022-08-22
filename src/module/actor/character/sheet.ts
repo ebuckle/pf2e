@@ -24,6 +24,7 @@ import { CharacterConfig } from "./config";
 import { DropCanvasItemDataPF2e } from "@module/canvas/drop-canvas-data";
 import { SkillBuilderPopup } from "@actor/sheet/popups/skill-builder";
 import { SKILL_DICTIONARY } from "@actor/values";
+import { SkillMatrixPopup } from "@actor/sheet/popups/skill-matrix";
 
 class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
     protected readonly actorConfigClass = CharacterConfig;
@@ -550,6 +551,10 @@ class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
 
         $html.find("button[data-action=edit-ability-scores]").on("click", async () => {
             await new AbilityBuilderPopup(this.actor).render(true);
+        });
+
+        $html.find("button[data-action=edit-skills]").on("click", async () => {
+            await new SkillMatrixPopup(this.actor).render(true);
         });
 
         // Roll skill checks

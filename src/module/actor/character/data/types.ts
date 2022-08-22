@@ -121,6 +121,10 @@ interface CharacterSystemData extends CreatureSystemData {
 
             allowedTraining: Record<ZeroToTwenty, number>;
 
+            skillTraining: Record<ZeroToTwenty, SkillAbbreviation[]>;
+
+            skillIncreases: Record<ZeroToTwenty, SkillAbbreviation[]>;
+
             skillData: Record<SkillAbbreviation, SkillProficiencyProgression>;
 
             // TODO: fully support lore skills

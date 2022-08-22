@@ -322,6 +322,8 @@ class CharacterPF2e extends CreaturePF2e {
                 loreData: systemData.build?.skills?.loreData || {},
                 allowedIncreases: {},
                 allowedTraining: {},
+                skillIncreases: systemData.build?.skills?.skillIncreases || {},
+                skillTraining: systemData.build?.skills?.skillTraining || {},
             },
         };
 
