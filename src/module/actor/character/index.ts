@@ -87,6 +87,7 @@ import {
     CharacterAttributes,
     CharacterData,
     CharacterFlags,
+    CharacterLoreData,
     CharacterProficiency,
     CharacterSaves,
     CharacterSkillData,
@@ -372,6 +373,12 @@ class CharacterPF2e extends CreaturePF2e {
             const skill = skills[key];
             skill.ability = SKILL_EXPANDED[SKILL_DICTIONARY[key]].ability;
             skill.armor = ["dex", "str"].includes(skill.ability);
+        }
+
+        const lores = this.system.lores;
+        for (const key in lores) {
+            const lore = lores[key];
+            lore.deletable = true;
         }
 
         // Spellcasting-tradition proficiencies
@@ -881,6 +888,8 @@ class CharacterPF2e extends CreaturePF2e {
             rollOptionsAll[`skill:${key}:rank:${rank}`] = true;
         }
 
+        // TODO: LORES
+
         for (const key of ARMOR_CATEGORIES) {
             const rank = this.system.martial[key].rank;
             rollOptionsAll[`defense:${key}:rank:${rank}`] = true;
@@ -1097,14 +1106,24 @@ class CharacterPF2e extends CreaturePF2e {
         }, {} as Record<SkillAbbreviation, CharacterSkillData>);
 
         // Lore skills
-        for (const loreItem of this.itemTypes.lore) {
-            // normalize skill name to lower-case and dash-separated words
-            const shortForm = sluggify(loreItem.name) as SkillAbbreviation;
-            const rank = loreItem.system.proficient.value;
+        for (const key in systemData.lores) {
+            // TODO: normalize skill name to lower-case and dash-separated words for lore key
+            const lore = systemData.lores[key];
+            const shortForm = key as SkillAbbreviation;
 
-            const domains = [shortForm, "int-based", "skill-check", "lore-skill-check", "int-skill-check", "all"];
+            const rank = lore.rank;
+            const ability = lore.ability;
+            const deletable = !!lore.deletable;
+            const domains = [
+                shortForm,
+                `${ability}-based`,
+                "skill-check",
+                "lore-skill-check",
+                `${ability}-skill-check`,
+                "all",
+            ];
             const modifiers = [
-                createAbilityModifier({ actor: this, ability: "int", domains }),
+                createAbilityModifier({ actor: this, ability: ability, domains }),
                 ProficiencyModifier.fromLevelAndRank(this.level, rank),
             ];
             for (const modifier of modifiers) {
@@ -1116,19 +1135,18 @@ class CharacterPF2e extends CreaturePF2e {
             }
             modifiers.push(...extractModifiers(synthetics, domains));
 
-            const loreSkill = systemData.skills[shortForm];
+            const loreSkill = systemData.skills[shortForm] as CharacterLoreData;
             const stat = mergeObject(
                 new StatisticModifier(shortForm, modifiers, this.getRollOptions(domains)),
                 loreSkill,
                 { overwrite: false }
             );
-            stat.label = loreItem.name;
-            stat.ability = "int";
-            stat.itemID = loreItem.id;
+            stat.label = lore.name;
+            stat.ability = ability;
             stat.notes = extractNotes(synthetics.rollNotes, domains);
             stat.rank = rank ?? 0;
             stat.shortform = shortForm;
-            stat.expanded = loreItem;
+            stat.expanded = lore;
             stat.value = stat.totalModifier;
             stat.lore = true;
             stat.breakdown = stat.modifiers
@@ -1139,7 +1157,7 @@ class CharacterPF2e extends CreaturePF2e {
                 console.warn(
                     `Rolling skill checks via actor.system.skills.${shortForm}.roll() is deprecated, use actor.skills.${shortForm}.check.roll() instead`
                 );
-                const label = game.i18n.format("PF2E.SkillCheckWithName", { skillName: loreItem.name });
+                const label = game.i18n.format("PF2E.SkillCheckWithName", { skillName: lore.name });
                 const rollOptions = args.options ?? [];
                 ensureProficiencyOption(rollOptions, rank);
 
@@ -1168,6 +1186,7 @@ class CharacterPF2e extends CreaturePF2e {
 
                 return roll;
             };
+            stat.deletable = deletable;
 
             skills[shortForm] = stat;
         }

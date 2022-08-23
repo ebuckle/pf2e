@@ -23,6 +23,7 @@ import { AbilityBuilderPopup } from "../sheet/popups/ability-builder";
 import { CharacterConfig } from "./config";
 import { DropCanvasItemDataPF2e } from "@module/canvas/drop-canvas-data";
 import { InitialFeatFilters } from "@module/apps/compendium-browser/tabs/data";
+import { CharacterLoreEditor } from "@actor/sheet/lore-dialog";
 
 class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
     protected readonly actorConfigClass = CharacterConfig;
@@ -527,6 +528,15 @@ class CharacterSheetPF2e extends CreatureSheetPF2e<CharacterPF2e> {
                 ManageCombatProficiencies.remove(this.actor, event);
             });
         }
+
+        $html.find("button.add-lore").on("click", async () => {
+            await new CharacterLoreEditor(this.actor).render(true);
+        });
+
+        $html.find("a.delete-lore").on("click", async (event) => {
+            const lore = event.currentTarget.closest<HTMLElement>("[data-skill]")?.dataset.skill ?? "";
+            await this.actor.update({ [`system.lores.-=${lore}`]: null });
+        });
 
         $html.find(".hover").tooltipster({
             trigger: "click",

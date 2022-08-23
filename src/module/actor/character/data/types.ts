@@ -73,6 +73,11 @@ interface CharacterSkillData extends SkillData {
     armor: boolean;
 }
 
+interface CharacterLoreData extends CharacterSkillData {
+    name: string;
+    deletable: boolean;
+}
+
 /** The raw information contained within the actor data object for characters. */
 interface CharacterSystemData extends CreatureSystemData {
     /** The six primary ability scores. */
@@ -133,6 +138,8 @@ interface CharacterSystemData extends CreatureSystemData {
 
     /** Player skills, used for various skill checks. */
     skills: Record<SkillAbbreviation, CharacterSkillData>;
+
+    lores: Record<string, CharacterLoreData>;
 
     traits: CharacterTraitsData;
 
@@ -452,6 +459,7 @@ export {
     CharacterResources,
     CharacterSaves,
     CharacterSkillData,
+    CharacterLoreData,
     CharacterSource,
     CharacterStrike,
     CharacterSystemData,

@@ -157,6 +157,9 @@
                         font-size: var(--font-size-10);
                         margin-top: 1px;
                         margin-left: 0.5rem;
+                        .item-control.disabled {
+                            opacity: 0.3;
+                        }
                     }
                 }
             }
