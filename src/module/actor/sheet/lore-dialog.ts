@@ -11,7 +11,7 @@ export class CharacterLoreEditor extends FormApplication<CharacterPF2e> {
 
         options.id = "character-lore-editor";
         options.classes = ["pf2e", "character"];
-        options.title = game.i18n.localize("PF2E.NPC.SkillsEditor.TitleLabel");
+        options.title = game.i18n.localize("PF2E.AddLoreSkill");
         options.template = "systems/pf2e/templates/actors/lore-dialog.html";
         options.width = "auto";
         options.height = "auto";

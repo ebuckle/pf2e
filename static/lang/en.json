@@ -2265,7 +2265,7 @@
         "LoreProficiencyDisclaimer": "Informational only. Will not change the skill modifier.",
         "LoreSkillsHeader": "Lore Skills",
         "LoreSkillFormat": "{name} Lore",
-        "AddLoreSkill": "Add lore skill",
+        "AddLoreSkill": "Add Lore Skill",
         "NewLoreSkill": "New skill",
         "Macro": {
             "Plural": "Macros"
