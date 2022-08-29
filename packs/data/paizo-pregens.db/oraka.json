@@ -473,15 +473,24 @@
                         "key": "FlatModifier",
                         "predicate": {
                             "all": [
+                                "class:investigator",
                                 "devise-a-stratagem"
                             ],
                             "any": [
-                                "agile",
-                                "finesse",
-                                "ranged"
+                                "weapon:trait:agile",
+                                "weapon:trait:finesse",
+                                {
+                                    "and": [
+                                        "weapon:ranged",
+                                        {
+                                            "not": "weapon:thrown-melee"
+                                        }
+                                    ]
+                                },
+                                "weapon:base:sap"
                             ]
                         },
-                        "selector": "attack",
+                        "selector": "attack-roll",
                         "type": "ability"
                     }
                 ],
@@ -1413,13 +1422,29 @@
                         "key": "FlatModifier",
                         "predicate": {
                             "all": [
-                                "devise-a-stratagem"
+                                "class:investigator",
+                                "devise-a-stratagem",
+                                {
+                                    "or": [
+                                        "action:disarm",
+                                        "action:grapple",
+                                        "action:shove",
+                                        "action:trip"
+                                    ]
+                                }
                             ],
                             "any": [
-                                "action:disarm",
-                                "action:grapple",
-                                "action:shove",
-                                "action:trip"
+                                "weapon:trait:agile",
+                                "weapon:trait:finesse",
+                                {
+                                    "and": [
+                                        "weapon:ranged",
+                                        {
+                                            "not": "weapon:thrown-melee"
+                                        }
+                                    ]
+                                },
+                                "weapon:base:sap"
                             ]
                         },
                         "selector": "athletics",
@@ -4143,7 +4168,6 @@
             }
         },
         "crafting": {
-            "entries": {},
             "formulas": []
         },
         "details": {

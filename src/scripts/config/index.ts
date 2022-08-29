@@ -29,13 +29,7 @@ import { DamageCategory, DamageType } from "@system/damage/calculation";
 import { ImmunityType, ResistanceType, WeaknessType } from "@actor/data/base";
 import { RANGE_TRAITS } from "@item/data/values";
 import { ActorType } from "@actor/data";
-import {
-    BaseWeaponType,
-    MeleeWeaponGroup,
-    RangedWeaponGroup,
-    WeaponGroup,
-    WeaponPropertyRuneType,
-} from "@item/weapon/types";
+import { BaseWeaponType, MeleeWeaponGroup, WeaponGroup, WeaponPropertyRuneType } from "@item/weapon/types";
 import enJSON from "../../../static/lang/en.json";
 import { SenseAcuity, SenseType } from "@actor/creature/sense";
 import {
@@ -73,7 +67,7 @@ import { sluggify } from "@util";
 import { Alignment } from "@actor/creature/types";
 import { WeaponReloadTime } from "@item/weapon/types";
 
-export type StatusEffectIconTheme = "default" | "blackWhite" | "legacy";
+export type StatusEffectIconTheme = "default" | "blackWhite";
 
 const actorTypes: Record<ActorType, string> = {
     character: "ACTOR.TypeCharacter",
@@ -138,7 +132,8 @@ const damageTypes: Record<DamageType, string> = {
     untyped: "PF2E.TraitUntyped",
 };
 
-const conditionTypes: Record<ConditionSlug, string> = {
+/** Non-detection- and attitude- related conditions added to the Token HUD */
+const tokenHUDConditions = {
     blinded: "PF2E.ConditionTypeBlinded",
     broken: "PF2E.ConditionTypeBroken",
     clumsy: "PF2E.ConditionTypeClumsy",
@@ -156,16 +151,10 @@ const conditionTypes: Record<ConditionSlug, string> = {
     fatigued: "PF2E.ConditionTypeFatigued",
     "flat-footed": "PF2E.ConditionTypeFlatFooted",
     fleeing: "PF2E.ConditionTypeFleeing",
-    friendly: "PF2E.ConditionTypeFriendly",
     frightened: "PF2E.ConditionTypeFrightened",
     grabbed: "PF2E.ConditionTypeGrabbed",
-    helpful: "PF2E.ConditionTypeHelpful",
-    hidden: "PF2E.ConditionTypeHidden",
-    hostile: "PF2E.ConditionTypeHostile",
     immobilized: "PF2E.ConditionTypeImmobilized",
-    indifferent: "PF2E.ConditionTypeIndifferent",
     invisible: "PF2E.ConditionTypeInvisible",
-    observed: "PF2E.ConditionTypeObserved",
     paralyzed: "PF2E.ConditionTypeParalyzed",
     "persistent-damage": "PF2E.ConditionTypePersistent",
     petrified: "PF2E.ConditionTypePetrified",
@@ -177,10 +166,20 @@ const conditionTypes: Record<ConditionSlug, string> = {
     stunned: "PF2E.ConditionTypeStunned",
     stupefied: "PF2E.ConditionTypeStupefied",
     unconscious: "PF2E.ConditionTypeUnconscious",
+    wounded: "PF2E.ConditionTypeWounded",
+};
+
+const conditionTypes: Record<ConditionSlug, string> = {
+    ...tokenHUDConditions,
+    friendly: "PF2E.ConditionTypeFriendly",
+    helpful: "PF2E.ConditionTypeHelpful",
+    hidden: "PF2E.ConditionTypeHidden",
+    hostile: "PF2E.ConditionTypeHostile",
+    indifferent: "PF2E.ConditionTypeIndifferent",
+    observed: "PF2E.ConditionTypeObserved",
     undetected: "PF2E.ConditionTypeUndetected",
     unfriendly: "PF2E.ConditionTypeUnfriendly",
     unnoticed: "PF2E.ConditionTypeUnnoticed",
-    wounded: "PF2E.ConditionTypeWounded",
 };
 
 const immunityTypes: Record<ImmunityType, string> = {
@@ -672,6 +671,7 @@ const meleeWeaponGroups: Record<MeleeWeaponGroup, string> = {
     axe: "PF2E.WeaponGroupAxe",
     brawling: "PF2E.WeaponGroupBrawling",
     club: "PF2E.WeaponGroupClub",
+    dart: "PF2E.WeaponGroupDart",
     flail: "PF2E.WeaponGroupFlail",
     hammer: "PF2E.WeaponGroupHammer",
     knife: "PF2E.WeaponGroupKnife",
@@ -682,15 +682,13 @@ const meleeWeaponGroups: Record<MeleeWeaponGroup, string> = {
     sword: "PF2E.WeaponGroupSword",
 };
 
-const rangedWeaponGroups: Record<RangedWeaponGroup, string> = {
+const weaponGroups: Record<WeaponGroup, string> = {
+    ...meleeWeaponGroups,
     bomb: "PF2E.WeaponGroupBomb",
     bow: "PF2E.WeaponGroupBow",
-    dart: "PF2E.WeaponGroupDart",
     firearm: "PF2E.WeaponGroupFirearm",
     sling: "PF2E.WeaponGroupSling",
 };
-
-const weaponGroups: Record<WeaponGroup, string> = { ...meleeWeaponGroups, ...rangedWeaponGroups };
 
 const weaponPropertyRunes = {
     ...Object.entries(WEAPON_PROPERTY_RUNES).reduce((accumulated, [slug, rune]) => {
@@ -756,15 +754,12 @@ const weaponReload: Record<WeaponReloadTime, string> = {
 };
 
 export const PF2ECONFIG = {
-    chatDamageButtonShieldToggle: false, // Couldnt call this simple CONFIG.statusEffects, and spend 20 minutes trying to find out why. Apparently thats also used by FoundryVTT and we are still overloading CONFIG.
-    // Can be changed by modules or other settings, e.g. 'modules/myModule/icons/effects/'
+    chatDamageButtonShieldToggle: false,
 
     statusEffects: {
-        lastIconType: "default" as StatusEffectIconTheme,
-        folder: "systems/pf2e/icons/conditions/",
-        extension: "webp",
-        keepFoundryStatusEffects: true,
-        foundryStatusEffects: [] as string[],
+        lastIconTheme: "default" as StatusEffectIconTheme,
+        iconDir: "systems/pf2e/icons/conditions/",
+        conditions: tokenHUDConditions,
     },
 
     levels: {
@@ -983,7 +978,6 @@ export const PF2ECONFIG = {
     weaponCategories,
     weaponGroups,
     meleeWeaponGroups,
-    rangedWeaponGroups,
 
     baseWeaponTypes,
     equivalentWeapons,

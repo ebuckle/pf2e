@@ -105,10 +105,6 @@ export function registerTemplates(): void {
         "systems/pf2e/templates/items/weapon-sidebar.html",
         "systems/pf2e/templates/items/activation-panel.html",
 
-        // Rule Element partials
-        "systems/pf2e/templates/items/rules/default.html",
-        "systems/pf2e/templates/items/rules/note.html",
-
         // Loot partials
         "systems/pf2e/templates/actors/loot/inventory.html",
         "systems/pf2e/templates/actors/loot/sidebar.html",
@@ -135,6 +131,8 @@ export function registerTemplates(): void {
         "systems/pf2e/templates/system/actions/repair/item-heading-partial.html",
 
         // TokenConfig partials
+        "systems/pf2e/templates/scene/token/partials/appearance.html",
+        "systems/pf2e/templates/scene/token/partials/identity.html",
         "systems/pf2e/templates/scene/token/partials/lighting.html",
     ];
 

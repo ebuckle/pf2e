@@ -28,9 +28,12 @@ import {
     WeaponReloadTime,
     WeaponTrait,
 } from "./types";
-import { CROSSBOW_WEAPONS, RANGED_WEAPON_GROUPS, THROWN_RANGES } from "./values";
+import { CROSSBOW_WEAPONS, MANDATORY_RANGED_GROUPS, THROWN_RANGES } from "./values";
 
 class WeaponPF2e extends PhysicalItemPF2e {
+    /** Given this weapon is an alternative usage, whether it is melee or thrown */
+    altUsageType: "melee" | "thrown" | null = null;
+
     override get isEquipped(): boolean {
         const { category, slug, traits } = this.system;
         // Make unarmed "weapons" always equipped with the exception of handwraps
@@ -143,6 +146,7 @@ class WeaponPF2e extends PhysicalItemPF2e {
             actor?.isOfType("character") &&
             actor.deity?.favoredWeapons.includes(this.baseType)
         );
+        const thrownMelee = this.isThrown && this.altUsageType === "thrown";
 
         return [
             super.getRollOptions(prefix),
@@ -157,11 +161,12 @@ class WeaponPF2e extends PhysicalItemPF2e {
                 [`damage:type:${damage.type}`]: true,
                 [`damage:die:faces:${damage.dieFaces}`]: true,
                 [`damage-dice:${1 + this.system.runes.striking}`]: true,
-                ["deity-favored"]: isDeityFavored,
+                "deity-favored": isDeityFavored,
                 oversized,
                 melee: this.isMelee,
                 ranged: this.isRanged,
                 thrown: this.isThrown,
+                "thrown-melee": thrownMelee,
             })
                 .filter(([_key, isTrue]) => isTrue)
                 .map(([key]) => `${delimitedPrefix}${key}`),
@@ -218,7 +223,7 @@ class WeaponPF2e extends PhysicalItemPF2e {
 
         // Force a weapon to be ranged if it is among a set of certain groups or has a thrown trait
         const traitSet = this.traits;
-        const mandatoryRanged = setHasElement(RANGED_WEAPON_GROUPS, systemData.group) || traitSet.has("thrown");
+        const mandatoryRanged = setHasElement(MANDATORY_RANGED_GROUPS, systemData.group) || traitSet.has("thrown");
         if (mandatoryRanged) {
             this.system.range ??= 10;
 
@@ -284,21 +289,6 @@ class WeaponPF2e extends PhysicalItemPF2e {
         const materialData = this.getMaterialData();
         if (!(this.isMagical || materialData) || this.isSpecific) return;
 
-        // Adjust the weapon price according to precious material and runes
-        // Base Prices are not included in these cases
-        // https://2e.aonprd.com/Rules.aspx?ID=731
-        // https://2e.aonprd.com/Equipment.aspx?ID=380
-        const materialPrice = materialData?.price ?? 0;
-        const bulk = materialPrice && Math.max(Math.ceil(toBulkItem(this).bulk.normal), 1);
-        const materialValue = materialPrice + (bulk * materialPrice) / 10;
-        const runeValue = runesData.reduce((sum, rune) => sum + rune.price, 0);
-        const modifiedPrice = new CoinsPF2e({ gp: runeValue + materialValue });
-
-        const basePrice = this.price.value;
-        const modifiedIsHigher = modifiedPrice.copperValue > basePrice.copperValue;
-        const highestPrice = modifiedIsHigher ? modifiedPrice : basePrice;
-        systemData.price.value = highestPrice;
-
         const baseLevel = this.level;
         systemData.level.value = runesData
             .map((runeData) => runeData.level)
@@ -319,6 +309,23 @@ class WeaponPF2e extends PhysicalItemPF2e {
 
         // Set the name according to the precious material and runes
         this.name = this.generateMagicName();
+    }
+
+    override computeAdjustedPrice(): CoinsPF2e | null {
+        const materialData = this.getMaterialData();
+        if (!(this.isMagical || materialData) || this.isSpecific) return null;
+
+        // Adjust the weapon price according to precious material and runes
+        // Base Prices are not included in these cases
+        // https://2e.aonprd.com/Rules.aspx?ID=731
+        // https://2e.aonprd.com/Equipment.aspx?ID=380
+        const runesData = this.getRunesData();
+        const materialPrice = materialData?.price ?? 0;
+        const bulk = materialPrice && Math.max(Math.ceil(toBulkItem(this).bulk.normal), 1);
+        const materialValue = materialPrice + (bulk * materialPrice) / 10;
+        const runeValue = runesData.reduce((sum, rune) => sum + rune.price, 0);
+        const modifiedPrice = new CoinsPF2e({ gp: runeValue + materialValue });
+        return modifiedPrice;
     }
 
     getRunesData(): RuneValuationData[] {
@@ -444,6 +451,24 @@ class WeaponPF2e extends PhysicalItemPF2e {
         ].flat();
     }
 
+    override clone<T extends this>(
+        data: DocumentUpdateData<this> | undefined,
+        options: Omit<WeaponCloneOptions, "save"> & { save: true }
+    ): Promise<T>;
+    override clone<T extends this>(
+        data?: DocumentUpdateData<this>,
+        options?: Omit<WeaponCloneOptions, "save"> & { save?: false }
+    ): T;
+    override clone<T extends this>(data?: DocumentUpdateData<this>, options?: WeaponCloneOptions): T | Promise<T>;
+    override clone(data?: DocumentUpdateData<this>, options?: WeaponCloneOptions): this | Promise<this> {
+        const clone = super.clone(data, options);
+        if (options?.altUsage && clone instanceof WeaponPF2e) {
+            clone.altUsageType = options.altUsage;
+        }
+
+        return clone;
+    }
+
     /** Generate a clone of this thrown melee weapon with its thrown usage overlain, or `null` if not applicable */
     private toThrownUsage(): this | null {
         const traits = this.system.traits.value;
@@ -459,7 +484,8 @@ class WeaponPF2e extends PhysicalItemPF2e {
                 traits: { value: newTraits },
             },
         };
-        return this.clone(overlay, { keepId: true });
+
+        return this.clone(overlay, { keepId: true, altUsage: "thrown" });
     }
 
     /** Generate a clone of this combination weapon with its melee usage overlain, or `null` if not applicable */
@@ -482,7 +508,7 @@ class WeaponPF2e extends PhysicalItemPF2e {
                 },
             },
         };
-        return this.clone(overlay, { keepId: true });
+        return this.clone(overlay, { keepId: true, altUsage: "melee" });
     }
 
     /** Generate a melee item from this weapon for use by NPCs */
@@ -611,6 +637,13 @@ interface WeaponPF2e {
     readonly data: WeaponData;
 
     get traits(): Set<WeaponTrait>;
+}
+
+interface WeaponCloneOptions {
+    save?: boolean;
+    keepId?: boolean;
+    /** If this clone is an alternative usage, the type */
+    altUsage?: "melee" | "thrown";
 }
 
 export { WeaponPF2e };

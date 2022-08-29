@@ -89,7 +89,7 @@ export class ActionMacroHelpers {
 
                 const targetOptions = targetActor?.getSelfRollOptions("target") ?? [];
                 const selfToken = actor.getActiveTokens(false, true).shift();
-                const finalOptions = [
+                const combinedOptions = [
                     actor.getRollOptions(options.rollOptions),
                     options.extraOptions,
                     options.traits,
@@ -99,24 +99,32 @@ export class ActionMacroHelpers {
                         ? "self:flanking"
                         : [],
                 ].flat();
-                const selfActor = actor.getContextualClone(finalOptions.filter((o) => o.startsWith("self:")));
+                const selfActor = actor.getContextualClone(combinedOptions.filter((o) => o.startsWith("self:")));
+
+                // Modifier from roller's equipped weapon
+                const weapon = ((): Embedded<WeaponPF2e> | null => {
+                    if (!options.traits.includes("attack")) return null;
+                    return (
+                        [
+                            ...(options.weaponTrait
+                                ? this.getApplicableEquippedWeapons(selfActor, options.weaponTrait)
+                                : []),
+                            ...(options.weaponTraitWithPenalty
+                                ? this.getApplicableEquippedWeapons(selfActor, options.weaponTraitWithPenalty)
+                                : []),
+                        ].shift() ?? this.getBasicUnarmedAttack(selfActor)
+                    );
+                })();
+                combinedOptions.push(...(weapon?.getRollOptions("weapon") ?? []));
 
                 const stat = getProperty(selfActor, options.statName) as StatisticModifier;
-                const modifiers =
-                    typeof options.modifiers === "function" ? options.modifiers(selfActor) : options.modifiers;
-                const check = new CheckModifier(content, stat, modifiers ?? []);
+                const itemBonus =
+                    weapon && weapon.slug !== "basic-unarmed" ? this.getWeaponPotencyModifier(weapon, stat.name) : null;
 
-                // modifier from roller's equipped weapon
-                const weapon = [
-                    ...(options.weaponTrait ? this.getApplicableEquippedWeapons(selfActor, options.weaponTrait) : []),
-                    ...(options.weaponTraitWithPenalty
-                        ? this.getApplicableEquippedWeapons(selfActor, options.weaponTraitWithPenalty)
-                        : []),
-                ].shift();
-                if (weapon) {
-                    const modifier = this.getWeaponPotencyModifier(weapon, stat.name);
-                    if (modifier) check.push(modifier);
-                }
+                const modifiers =
+                    (typeof options.modifiers === "function" ? options.modifiers(selfActor) : options.modifiers) ?? [];
+                if (itemBonus) modifiers.push(itemBonus);
+                const check = new CheckModifier(content, stat, modifiers);
 
                 const weaponTraits = weapon?.traits;
 
@@ -139,7 +147,6 @@ export class ActionMacroHelpers {
                     );
                 }
 
-                ensureProficiencyOption(finalOptions, stat.rank ?? -1);
                 const dc = ((): CheckDC | null => {
                     if (options.difficultyClass) {
                         return options.difficultyClass;
@@ -147,7 +154,7 @@ export class ActionMacroHelpers {
                         // try to resolve target's defense stat and calculate DC
                         const dcStat = options.difficultyClassStatistic?.(targetActor);
                         if (dcStat) {
-                            const extraRollOptions = finalOptions.concat(targetOptions);
+                            const extraRollOptions = combinedOptions.concat(targetOptions);
                             const { dc } = dcStat.withRollOptions({ extraRollOptions });
                             const dcData: CheckDC = {
                                 value: dc.value,
@@ -160,6 +167,11 @@ export class ActionMacroHelpers {
                     }
                     return null;
                 })();
+
+                const finalOptions = new Set(combinedOptions);
+                ensureProficiencyOption(finalOptions, stat.rank ?? -1);
+                check.calculateTotal(finalOptions);
+
                 const actionTraits: Record<string, string | undefined> = CONFIG.PF2E.actionTraits;
                 const traitDescriptions: Record<string, string | undefined> = CONFIG.PF2E.traitsDescriptions;
                 const traitObjects = options.traits.map((trait) => ({
@@ -193,6 +205,7 @@ export class ActionMacroHelpers {
                     {
                         actor: selfActor,
                         token: selfToken,
+                        item: weapon,
                         createMessage: options.createMessage,
                         target: targetInfo,
                         dc,
@@ -254,5 +267,10 @@ export class ActionMacroHelpers {
         } else {
             return actor.itemTypes.weapon.filter((w) => w.isEquipped && w.traits.has(trait));
         }
+    }
+
+    private static getBasicUnarmedAttack(actor: ActorPF2e): Embedded<WeaponPF2e> | null {
+        if (!actor.isOfType("character")) return null;
+        return actor.system.actions.find((s) => s.ready && s.slug === "basic-unarmed")?.item ?? null;
     }
 }

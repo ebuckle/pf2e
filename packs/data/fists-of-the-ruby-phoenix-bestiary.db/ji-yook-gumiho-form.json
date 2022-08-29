@@ -784,10 +784,11 @@
                     "value": "Pathfinder Bestiary"
                 },
                 "traits": {
-                    "custom": "[magical tradition]",
+                    "custom": "",
                     "rarity": "common",
                     "value": [
                         "concentrate",
+                        "divine",
                         "polymorph",
                         "transmutation"
                     ]
@@ -965,18 +966,16 @@
                         "key": "DamageDice",
                         "predicate": {
                             "all": [
-                                "target:condition:flat-footed",
+                                "target:condition:flat-footed"
+                            ],
+                            "any": [
+                                "weapon:trait:agile",
+                                "weapon:trait:finesse",
                                 {
-                                    "or": [
-                                        "finesse",
-                                        "agile",
+                                    "and": [
+                                        "weapon:ranged",
                                         {
-                                            "and": [
-                                                "ranged",
-                                                {
-                                                    "not": "thrown"
-                                                }
-                                            ]
+                                            "not": "weapon:thrown-melee"
                                         }
                                     ]
                                 }

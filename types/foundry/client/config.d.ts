@@ -425,7 +425,15 @@ declare global {
         defaultFontFamily: string;
 
         /** An array of status effect icons which can be applied to Tokens */
-        statusEffects: string[];
+        statusEffects: StatusEffect[];
+
+        /** A mapping of status effect IDs which provide some additional mechanical integration. */
+        specialStatusEffects: {
+            DEFEATED: string;
+            INVISIBLE: string;
+            BLIND: string;
+            [key: string]: string;
+        };
 
         /** A mapping of core audio effects used which can be replaced by systems or mods */
         sounds: {
@@ -484,5 +492,11 @@ declare global {
             tables: typeof RollTableDirectory;
             // webrtc: typeof CameraViews;
         };
+    }
+
+    interface StatusEffect {
+        id: string;
+        label: string;
+        icon: ImagePath | VideoPath;
     }
 }

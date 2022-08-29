@@ -33,6 +33,8 @@ import { Migration770REDataToSystem } from "@module/migration/migrations/770-re-
 import { Migration771SpellVariantsToSystem } from "@module/migration/migrations/771-spell-variants-to-system";
 import { Migration772V10EmbeddedSpellData } from "@module/migration/migrations/772-v10-embedded-spell-data";
 import { Migration773ReligiousSymbolUsage } from "@module/migration/migrations/773-religious-symbol-usage";
+import { Migration774UnpersistCraftingEntries } from "@module/migration/migrations/774-unpersist-crafting-entries";
+import { Migration775AgileFinesseRanged } from "@module/migration/migrations/775-agile-finesse-ranged";
 // ^^^ don't let your IDE use the index in these imports. you need to specify the full path ^^^
 
 const { window } = new JSDOM();
@@ -68,6 +70,8 @@ const migrations: MigrationBase[] = [
     new Migration771SpellVariantsToSystem(),
     new Migration772V10EmbeddedSpellData(),
     new Migration773ReligiousSymbolUsage(),
+    new Migration774UnpersistCraftingEntries(),
+    new Migration775AgileFinesseRanged(),
 ];
 
 global.deepClone = <T>(original: T): T => {
@@ -260,8 +264,8 @@ async function migrate() {
                     return source;
                 }
             } catch (error) {
-                console.log(error);
-                throw {};
+                console.error(`Error encountered migrating "${filePath}":`);
+                throw error;
             }
         })();
 

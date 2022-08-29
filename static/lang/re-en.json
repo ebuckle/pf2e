@@ -832,6 +832,11 @@
                 "Selector": "Selector",
                 "Predicate": "Predicate"
             },
+            "GrantItem": {
+                "AllowDuplicate": "Allow Duplicates",
+                "ReplaceSelf": "Replace Self",
+                "ReevaluateOnUpdate": "Reevaluate on Update"
+            },
             "Note": {
                 "Hidden": "Hidden",
                 "Outcome": "Outcome",
@@ -842,8 +847,10 @@
         "SkillVariant": {
             "AboutCaves": "About Caves",
             "Aid": "To Aid",
+            "AttemptToFascinateOutdoorsInBrightSun": "Using Fascinating Performance Outdoors in Bright Sun",
             "Blacksmithing": "For Blacksmithing",
             "Buried": "Buried",
+            "CanClearlyIdentifyTheStars": "Can Clearly Identify the Stars",
             "Climb": "To Climb",
             "ClimbOrSwim": "To Climb or Swim",
             "CommandAnAnimal": "To Command a Animal",
@@ -859,6 +866,7 @@
             "DisarmGrappleAvoidDisarm": "To Disarm, Grapple, or avoid being Disarmed",
             "DisarmMetal": "To Disarm a Metal Item",
             "DisarmStoneMetal": "To Disarm Stone or Metal Objects",
+            "DiscernAndPredictWeather": "Discern Weather Patterns and Predict Upcoming Weather Conditions",
             "Escape": "To Escape",
             "Feint": "To Feint",
             "Forests": "In Forests",
@@ -880,6 +888,8 @@
             "ManeuverInFlight": "To Maneuver in Flight",
             "Mountains": "In Mountains",
             "Navigate": "To Navigate",
+            "NearTheOcean": "Near The Ocean",
+            "NighttimeWithMoonVisible": "Nighttime, with the Moon Visible",
             "Paint": "To Paint",
             "Sand": "In Sand",
             "SenseMotive": "to Sense Motive",
@@ -927,6 +937,9 @@
                 "DormantEruptionToggle": "You've Used Thermal Eruption Today",
                 "StoneFistLabel": "Stone Fist"
             },
+            "AllowedDrops": {
+                "DeityOrPantheon": "deity or pantheon"
+            },
             "AncestralParagon": {
                 "AllowedDrops": "1st-level ancestry feat",
                 "Prompt": "Select a 1st-level ancestry feat."
@@ -939,11 +952,6 @@
                 "BracersOfArmor": "Animal Skin w/ Bracers of Armor",
                 "ExplorersClothing": "Animal Skin w/ Explorer's Clothing",
                 "MageArmor": "Animal Skin w/ Mage Armor"
-            },
-            "MarkForDeath": {
-                "TargetMark": "Target is Marked for Death",
-                "SeekMark": "To Seek your Mark",
-                "DeceiveMark": "To use Deception to Feint your Mark"
             },
             "Automaton": {
                 "ArcaneLomotion": {
@@ -1275,6 +1283,11 @@
                 "ParthenogenicHatchling": {
                     "Note": "Each of your successful saving throws against a disease reduces its stage by 2, or by 1 for a virulent disease. Each critical success against an ongoing disease reduces its stage by 3, or by 2 for a virulent disease."
                 }
+            },
+            "MarkForDeath": {
+                "TargetMark": "Target is Marked for Death",
+                "SeekMark": "To Seek your Mark",
+                "DeceiveMark": "To use Deception to Feint your Mark"
             },
             "MartialProficiency": {
                 "AdvancedAzarketiWeapons": "Advanced Azarketi Weapons",

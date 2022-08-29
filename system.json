@@ -5,8 +5,8 @@
     "license": "./LICENSE",
     "version": "3.13.5",
     "compatibility": {
-        "minimum": "10.277",
-        "verified": "10.278",
+        "minimum": "10.279",
+        "verified": "10.279",
         "maximum": "10"
     },
     "authors": [
@@ -134,6 +134,15 @@
             "label": "Lost Omens: Monsters of Myth",
             "system": "pf2e",
             "path": "packs/monsters-of-myth-bestiary.db",
+            "type": "Actor",
+            "private": true,
+            "folder": "bestiaries/rulebook"
+        }, 
+        {
+            "name": "lost-omens-travel-guide-bestiary",
+            "label": "Lost Omens: Travel Guide",
+            "system": "pf2e",
+            "path": "packs/travel-guide-bestiary.db",
             "type": "Actor",
             "private": true,
             "folder": "bestiaries/rulebook"
@@ -475,17 +484,9 @@
         },
         {
             "name": "feat-effects",
-            "label": "Feat Effects",
+            "label": "Feat and Feature Effects",
             "system": "pf2e",
             "path": "./packs/feat-effects.db",
-            "type": "Item",
-            "folder": "effects"
-        },
-        {
-            "name": "feature-effects",
-            "label": "Feature Effects",
-            "system": "pf2e",
-            "path": "./packs/feature-effects.db",
             "type": "Item",
             "folder": "effects"
         },

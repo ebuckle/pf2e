@@ -82,6 +82,13 @@ export class ItemSheetPF2e<TItem extends ItemPF2e> extends ItemSheet<TItem> {
         const validTraits = this.validTraits;
         const hasRarity = !this.item.isOfType("action", "condition", "deity", "effect", "lore", "melee");
 
+        // Activate rule element sub forms
+        this.ruleElementForms = {};
+        for (const [idx, rule] of rules.entries()) {
+            const FormClass = RULE_ELEMENT_FORMS[rule.key ?? ""] ?? RuleElementForm;
+            this.ruleElementForms[Number(idx)] = new FormClass(idx, rule);
+        }
+
         return {
             itemType: null,
             showTraits: this.validTraits !== null,
@@ -104,28 +111,32 @@ export class ItemSheetPF2e<TItem extends ItemPF2e> extends ItemSheet<TItem> {
             traits: validTraits ? createSheetTags(validTraits, this.item.system.traits?.value ?? []) : null,
             enabledRulesUI: game.settings.get("pf2e", "enabledRulesUI"),
             ruleEditing: !!this.editingRuleElement,
-            ruleLabels: rules.map((ruleData: RuleElementSource) => {
-                const translations: Record<string, string> = LocalizePF2e.translations.PF2E.RuleElement;
-                const key = ruleData.key.replace(/^PF2E\.RuleElement\./, "");
-                const label = translations[key] ?? translations.Unrecognized;
-                const recognized = label !== translations.Unrecognized;
-                return { label, recognized };
-            }),
-            ruleSelection: {
-                selected: this.selectedRuleElementType,
-                types: sortStringRecord(
-                    Object.keys(RuleElements.all).reduce((result: Record<string, string>, key) => {
-                        const translations: Record<string, string> = LocalizePF2e.translations.PF2E.RuleElement;
-                        result[key] = game.i18n.localize(translations[key] ?? key);
-                        return result;
-                    }, {})
+            rules: {
+                labels: rules.map((ruleData: RuleElementSource) => {
+                    const translations: Record<string, string> = LocalizePF2e.translations.PF2E.RuleElement;
+                    const key = ruleData.key.replace(/^PF2E\.RuleElement\./, "");
+                    const label = translations[key] ?? translations.Unrecognized;
+                    const recognized = label !== translations.Unrecognized;
+                    return { label, recognized };
+                }),
+                selection: {
+                    selected: this.selectedRuleElementType,
+                    types: sortStringRecord(
+                        Object.keys(RuleElements.all).reduce((result: Record<string, string>, key) => {
+                            const translations: Record<string, string> = LocalizePF2e.translations.PF2E.RuleElement;
+                            result[key] = game.i18n.localize(translations[key] ?? key);
+                            return result;
+                        }, {})
+                    ),
+                },
+                elements: await Promise.all(
+                    rules.map(async (rule, index) => ({
+                        template: await this.ruleElementForms[index].render(),
+                        index,
+                        rule,
+                    }))
                 ),
             },
-            ruleElements: rules.map((rule, index) => ({
-                template: RULE_ELEMENT_FORMS[rule.key]?.template ?? "systems/pf2e/templates/items/rules/default.html",
-                index,
-                rule,
-            })),
             sidebarTemplate: () => `systems/pf2e/templates/items/${item.type}-sidebar.html`,
             detailsTemplate: () => `systems/pf2e/templates/items/${item.type}-details.html`,
             proficiencies: CONFIG.PF2E.proficiencyLevels, // lore only, will be removed later
@@ -135,7 +146,7 @@ export class ItemSheetPF2e<TItem extends ItemPF2e> extends ItemSheet<TItem> {
     protected onTagSelector(event: JQuery.TriggeredEvent): void {
         event.preventDefault();
         const $anchor = $(event.currentTarget);
-        const selectorType = $anchor.attr("data-trait-selector") ?? "";
+        const selectorType = $anchor.attr("data-tag-selector") ?? "";
         if (!(selectorType === "basic" && tupleHasValue(TAG_SELECTOR_TYPES, selectorType))) {
             throw ErrorPF2e("Item sheets can only use the basic tag selector");
         }
@@ -179,29 +190,6 @@ export class ItemSheetPF2e<TItem extends ItemPF2e> extends ItemSheet<TItem> {
         return attackEffectOptions;
     }
 
-    private async addDamageRoll(event: JQuery.TriggeredEvent) {
-        event.preventDefault();
-        const newKey = randomID(20);
-        const newDamageRoll = {
-            damage: "",
-            damageType: "",
-        };
-        return this.item.update({
-            [`system.damageRolls.${newKey}`]: newDamageRoll,
-        });
-    }
-
-    private async deleteDamageRoll(event: JQuery.TriggeredEvent): Promise<ItemPF2e> {
-        event.preventDefault();
-        if (event.originalEvent) {
-            await this._onSubmit(event.originalEvent);
-        }
-        const targetKey = $(event.target).parents(".damage-part").attr("data-damage-part");
-        return this.item.update({
-            [`system.damageRolls.-=${targetKey}`]: null,
-        });
-    }
-
     override async close(options?: { force?: boolean }): Promise<void> {
         this.editingRuleElementIndex = null;
         return super.close(options);
@@ -220,17 +208,7 @@ export class ItemSheetPF2e<TItem extends ItemPF2e> extends ItemSheet<TItem> {
             }
         });
 
-        $html.find(".trait-selector").on("click", (ev) => this.onTagSelector(ev));
-
-        // Add Damage Roll
-        $html.find(".add-damage").on("click", (ev) => {
-            this.addDamageRoll(ev);
-        });
-
-        // Remove Damage Roll
-        $html.find(".delete-damage").on("click", (ev) => {
-            this.deleteDamageRoll(ev);
-        });
+        $html.find(".tag-selector").on("click", (ev) => this.onTagSelector(ev));
 
         $html.find("[data-action=select-rule-element]").on("change", async (event) => {
             event.preventDefault();
@@ -347,15 +325,12 @@ export class ItemSheetPF2e<TItem extends ItemPF2e> extends ItemSheet<TItem> {
         }
 
         // Activate rule element sub forms
-        this.ruleElementForms = {};
         const html = $html.get(0)!;
         const ruleSections = html.querySelectorAll<HTMLElement>(".rules .rule-form");
         for (const ruleSection of Array.from(ruleSections)) {
-            const { idx, key } = ruleSection.dataset;
-            const FormClass = RULE_ELEMENT_FORMS[key ?? ""];
-            if (FormClass) {
-                const form = new FormClass();
-                this.ruleElementForms[Number(idx)] = form;
+            const idx = Number(ruleSection.dataset.idx) || -1;
+            const form = this.ruleElementForms[idx];
+            if (form) {
                 form.activateListeners(ruleSection);
             }
         }
